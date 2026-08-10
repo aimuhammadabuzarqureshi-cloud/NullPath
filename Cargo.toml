@@ -1,0 +1,21 @@
+[package]
+name = "decoypath"
+version = "0.1.0"
+edition = "2021"
+authors = ["Muhammad Abu Zar Qureshi"]
+license = "MIT OR Apache-2.0"
+description = "High-Performance Zero-Trust Multi-Path Obfuscated Secure Messaging Protocol and C ABI Library"
+
+[dependencies]
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core", "zeroize"] }
+rand_core = "0.6"
+hkdf = "0.12"
+sha2 = "0.10"
+hmac = "0.12"
+chacha20poly1305 = "0.10"
+subtle = "2.5"
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
+
+[dev-dependencies]
+trybuild = "1.0"

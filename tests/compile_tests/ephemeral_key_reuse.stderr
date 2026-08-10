@@ -1,0 +1,16 @@
+error[E0382]: use of moved value: `keypair`
+ --> tests/compile_tests/ephemeral_key_reuse.rs:8:16
+  |
+5 |     let keypair = EphemeralKeyPair::generate();
+  |         ------- move occurs because `keypair` has type `EphemeralKeyPair`, which does not implement the `Copy` trait
+6 |     let peer_pub = X25519PublicKey::from([0u8; 32]);
+7 |     let _dh1 = keypair.diffie_hellman(&peer_pub);
+  |                        ------------------------- `keypair` moved due to this method call
+8 |     let _dh2 = keypair.diffie_hellman(&peer_pub);
+  |                ^^^^^^^ value used here after move
+  |
+note: `EphemeralKeyPair::diffie_hellman` takes ownership of the receiver `self`, which moves `keypair`
+ --> src/crypto.rs
+  |
+  |     pub fn diffie_hellman(self, peer_public: &X25519PublicKey) -> RawDhSecret {
+  |                           ^^^^
