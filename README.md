@@ -1,12 +1,8 @@
 <div align="center">
 
-```
-   _  ___  ____    __    ___  ___ _____ _   _ 
-  | \| | || |  |  |  |  | _ \/ _ \_   _| | | |
-  | .` | || |  |__|  |__|  _/ ___ \| | | |_| |
-  |_|\_|\___|____|____|____|_|   |_|_|  \___/ 
-                                              
-```
+<img src="assets/nullpath_hero_banner.png" alt="NullPath Hero Banner" width="100%"/>
+
+<br/>
 
 ### ⚡ NULLPATH ⚡
 **Next-Generation Zero-Trust, Multi-Path Obfuscated Secure Protocol Engine**
@@ -18,8 +14,9 @@
 [![Rust: 1.70+](https://img.shields.io/badge/rust-1.70%2B-orange.svg?style=for-the-badge&logo=rust)](https://www.rust-lang.org)
 [![License: Dual MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg?style=for-the-badge)](LICENSE)
 [![Build: Passing](https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge)](#)
-[![Crypto: Zero Unsafe](https://img.shields.io/badge/crypto-audited%20crates%20only-informational.svg?style=for-the-badge)](#security-architecture)
-[![Author: Muhammad Abu Zar Qureshi](https://img.shields.io/badge/author-Muhammad%20Abu%20Zar%20Qureshi-blueviolet.svg?style=for-the-badge)](#license)
+[![Tests: 45 Passing](https://img.shields.io/badge/tests-45%20passing-success.svg?style=for-the-badge)](#)
+[![Crypto: Zero Unsafe](https://img.shields.io/badge/crypto-audited%20crates%20only-informational.svg?style=for-the-badge)](#security-architecture--scope)
+[![Author: Muhammad Abu Zar Qureshi](https://img.shields.io/badge/author-Muhammad%20Abu%20Zar%20Qureshi-blueviolet.svg?style=for-the-badge)](#-license)
 
 [Overview](#-overview) ·
 [Comparative Matrix](#-protocol-comparative-matrix) ·
@@ -51,15 +48,19 @@ Modern secure channels (TLS 1.3, Noise Protocol, Signal) protect **content confi
 
 ### 🔮 Core Security Invariants
 
-- 🎭 **Metadata Uniformity**: Every transmission generates $N$ byte-identical 1024-byte envelopes. Real payloads are multiplexed alongside CSPRNG decoy envelopes encrypted under ephemeral keys.
-- 🔁 **Single-Use Forward Ratchet**: Keys are derived on-demand via single-use hash ratchets (`decoypath-v1-ratchet:`) and zeroized upon consumption. Past sessions remain inviolable.
-- ⚡ **Transactional Zero-Mutation**: Forged, corrupt, or out-of-order packets fail authentication in constant time before committing any state mutation.
-- 🧩 **Bounded Memory Execution**: $O(\log N)$ min-key eviction (`BTreeMap`) for skipped ratchet keys (`MAX_SKIPPED_KEYS = 1000`) and $O(1)$ amortized sliding-window anti-replay store (`10,000` capacity, 300s window).
-- 🌉 **Hardened Foreign ABI**: Standard C ABI bindings wrapped in `std::panic::catch_unwind` with strict buffer capacity verification and stack/heap memory zeroization.
+| Invariant | Description |
+|:----------|:------------|
+| 🎭 **Metadata Uniformity** | Every transmission generates $N$ byte-identical 1024-byte envelopes. Real payloads are multiplexed alongside CSPRNG decoy envelopes encrypted under ephemeral keys. |
+| 🔁 **Single-Use Forward Ratchet** | Keys are derived on-demand via single-use hash ratchets (`decoypath-v1-ratchet:`) and zeroized upon consumption. Past sessions remain inviolable. |
+| ⚡ **Transactional Zero-Mutation** | Forged, corrupt, or out-of-order packets fail authentication in constant time before committing any state mutation. |
+| 🧩 **Bounded Memory Execution** | $O(\log N)$ min-key eviction (`BTreeMap`) for skipped ratchet keys (`MAX_SKIPPED_KEYS = 1000`) and $O(1)$ amortized sliding-window anti-replay store (`10,000` capacity, 300s window). |
+| 🌉 **Hardened Foreign ABI** | Standard C ABI bindings wrapped in `std::panic::catch_unwind` with strict buffer capacity verification and stack/heap memory zeroization. |
 
 ---
 
 ## 📊 Protocol Comparative Matrix
+
+<div align="center">
 
 | Security & Architectural Feature | `NullPath` | **TLS 1.3** | **Noise Protocol** | **Signal Protocol** | **Tor / Mixnet** |
 |:---------------------------------|:----------:|:-----------:|:------------------:|:-------------------:|:----------------:|
@@ -73,9 +74,19 @@ Modern secure channels (TLS 1.3, Noise Protocol, Signal) protect **content confi
 | **Constant-Time Decoy Rejection** | ✅ Equal Time | ❌ N/A | ❌ N/A | ❌ N/A | ⚠️ Variable |
 | **C ABI Foreign Embeddability** | ✅ Hardened C ABI | ⚠️ OpenSSL / C | ⚠️ Native C | ⚠️ libsignal | ⚠️ C / Rust Lib |
 
+</div>
+
 ---
 
 ## 🏗️ System Architecture
+
+<div align="center">
+<img src="assets/multipath_dispatch.png" alt="NullPath Multi-Path Envelope Dispatch" width="80%"/>
+<br/>
+<em>Multi-Path Envelope Dispatch — Real payloads are indistinguishable from CSPRNG decoys across all N slots</em>
+</div>
+
+<br/>
 
 ```mermaid
 graph TB
@@ -120,7 +131,15 @@ graph TB
 
 ## 🔄 Protocol Lifecycle
 
-### 1. Handshake Phase — Transcript-Bound Mutual Authentication
+### Phase 1 — Transcript-Bound Mutual Authentication Handshake
+
+<div align="center">
+<img src="assets/handshake_auth.png" alt="NullPath Cryptographic Handshake Authentication" width="80%"/>
+<br/>
+<em>Dual-signed X25519 Ephemeral DH Exchange with Ed25519 Identity Binding & HKDF-SHA256 Transcript Derivation</em>
+</div>
+
+<br/>
 
 Two endpoints holding pre-shared Ed25519 identity keypairs execute an ephemeral X25519 Diffie-Hellman exchange:
 
@@ -148,7 +167,33 @@ sequenceDiagram
 
 ---
 
-### 2. Transmission Phase — Obfuscated Multi-Path Dispatch
+### Phase 2 — Forward-Secret Ratchet Key Derivation
+
+<div align="center">
+<img src="assets/forward_secrecy_ratchet.png" alt="NullPath Forward Secrecy Ratchet Chain" width="80%"/>
+<br/>
+<em>Single-Use Hash Ratchet Chain — Each key is derived, used once, then irreversibly zeroized. Past keys are unrecoverable.</em>
+</div>
+
+<br/>
+
+The ratchet chain derives unique per-message keys from the shared `RootKey` using domain-separated HMAC-SHA256:
+
+```
+RootKey ──HMAC──► RatchetKey[0] ──HMAC──► RatchetKey[1] ──HMAC──► RatchetKey[2] ──► ...
+                       │                       │                       │
+                    [Zeroized]              [Zeroized]              [Zeroized]
+                   after use               after use               after use
+```
+
+Each `RatchetKey[n]` is:
+- Used exactly **once** to seal/open an envelope at sequence `n`
+- Immediately **zeroized** in memory after consumption
+- **Non-invertible** — compromising `RatchetKey[n]` reveals nothing about `RatchetKey[n-1]`
+
+---
+
+### Phase 3 — Obfuscated Multi-Path Dispatch
 
 Payloads (up to 992 bytes) are sealed inside fixed 1024-byte envelopes and dispatched across $N$ path slots:
 
@@ -172,6 +217,14 @@ flowchart TD
 
 ## 🛡️ Transactional Zero-Mutation State Machine
 
+<div align="center">
+<img src="assets/zero_mutation_shield.png" alt="NullPath Zero-Mutation Security Shield" width="70%"/>
+<br/>
+<em>5-Layer Transactional Defense — Forged packets, replay attacks, and injection attempts are rejected with zero state mutation</em>
+</div>
+
+<br/>
+
 Incoming envelope arrays pass through a 5-step transactional pipeline ensuring **zero state mutation** on unauthenticated or forged packets:
 
 ```mermaid
@@ -193,6 +246,15 @@ flowchart TD
     style Reject fill:#311B92,stroke:#F38BA8,color:#F38BA8
     style Success fill:#11111B,stroke:#A6E3A1,color:#CDD6F4
 ```
+
+### Why This Matters
+
+| Attack Scenario | Traditional Protocol | NullPath Response |
+|:----------------|:---------------------|:------------------|
+| **Forged packet with claimed seq=500** | Session state advanced to 500, all intermediate keys lost | Zero state mutation. Keys derived read-only, discarded on auth failure. |
+| **Replay of successfully processed packet** | Re-accepted or connection reset | `AntiReplayStore` detects duplicate → `ReplayedSequence` error |
+| **Packet flood at max skip distance** | Unbounded CPU/memory consumption | Bounded to `MAX_SKIP_WINDOW=1000` derivations, `MAX_SKIPPED_KEYS=1000` storage |
+| **Corrupt envelope on valid sequence** | AEAD failure, session may be invalidated | Auth failure → zero mutation → genuine retransmission still succeeds |
 
 ---
 
@@ -250,11 +312,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let payload = b"Confidential transmission over NullPath";
     let envelopes = alice_channel.send(payload, message_id)?;
 
+    // envelopes.len() == 4  (1 real + 3 decoys, all 1024 bytes each)
+
     // 5. Receive, authenticate, and decrypt payload (Sequence = 0)
     let received_payload = bob_channel.receive(&envelopes, 0, message_id)?;
 
     assert_eq!(received_payload, payload);
-    println!("Successfully decrypted: {}", String::from_utf8(received_payload)?);
+    println!("✅ Decrypted: {}", String::from_utf8(received_payload)?);
 
     Ok(())
 }
@@ -264,7 +328,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## 🌉 C ABI & Foreign Language Bindings
 
-`NullPath` exposes a C ABI header in [`include/decoypath.h`](file:///home/ghostshadow/Documents/personal/blockchain/include/decoypath.h):
+`NullPath` exposes a hardened C ABI header in [`include/decoypath.h`](include/decoypath.h) for embedding in C, C++, Python, Go, Node.js, and any language supporting FFI:
 
 ```c
 #include "decoypath.h"
@@ -285,26 +349,111 @@ int main(void) {
 }
 ```
 
+All `extern "C"` functions are wrapped in `std::panic::catch_unwind` — a Rust panic inside any FFI call returns a `DECOYPATH_ERR_*` code instead of unwinding across the C ABI boundary.
+
 ---
 
 ## 🔐 Security Architecture & Scope
 
-### In Scope Defenses
+### In-Scope Threat Mitigations
 
 | Threat Vector | Mitigation Strategy |
 |:--------------|:--------------------|
 | **Man-in-the-Middle (MitM)** | Dual-signed Ed25519 identity exchange with HKDF-SHA256 transcript binding |
 | **Passive Traffic Analysis** | Constant 1024-byte multi-path envelopes + CSPRNG decoy path traffic generation |
-| **Replay & Injection Attacks** | Sequence-bound AAD commitment + sliding-window `AntiReplayStore` |
-| **Slot Index Guessing** | Deterministic but unpredictable HMAC-SHA256 slot selection |
+| **Replay & Injection Attacks** | Sequence-bound AAD commitment + sliding-window `AntiReplayStore` (10K capacity, 300s window) |
+| **Slot Index Guessing** | Deterministic but unpredictable HMAC-SHA256 slot selection keyed by ratchet key + message ID |
 | **Retroactive Key Compromise** | Forward-secret single-use hash ratcheting (`decoypath-v1-ratchet:`) with immediate zeroization |
 | **State Poisoning via Forgery** | 5-step transactional pipeline ensuring zero state mutation on unauthenticated envelopes |
+| **CPU Exhaustion DoS** | Per-packet cost bounded to `MAX_SKIP_WINDOW` (1000) derivations — not eliminated; rate-limiting recommended |
+| **FFI Panic UB** | All `extern "C"` functions wrapped in `std::panic::catch_unwind` |
 
-### Out of Scope Boundaries
+### Out-of-Scope Boundaries
 
-- **C ABI Memory Zeroization Boundary**: Key material and decrypted plaintext bytes copied across the C ABI boundary into caller-allocated raw buffers (e.g. C `uint8_t*`, Python `bytes`, Node `Buffer`) leave Rust's `Zeroize` tracking. The calling application is strictly responsible for zeroizing caller memory.
-- **Endpoint Compromise**: Host malware, process memory dumps, or physical extraction of identity key material.
-- **Transport Layer Metadata**: IP routing headers, TCP/UDP port metadata, and network packet timing. `NullPath` operates at the application protocol layer.
+| Boundary | Responsibility |
+|:---------|:---------------|
+| **C ABI Memory Zeroization** | Plaintext/key bytes copied into caller-allocated buffers (`uint8_t*`) leave Rust's `Zeroize` tracking. Caller must zeroize their own memory. |
+| **Endpoint Compromise** | Host malware, process memory dumps, or physical key extraction. |
+| **Transport Layer Metadata** | IP routing headers, TCP/UDP ports, and packet timing. NullPath operates at the application protocol layer. |
+
+---
+
+## 🧪 Test Suite
+
+45 tests across 8 test modules covering every security-critical path:
+
+```
+  Test Module                    Tests   Coverage Focus
+  ───────────────────────────────────────────────────────────────
+  test_handshake                 8       Mutual auth, tampering, key isolation, zeroization
+  test_channel                   8       In-order, out-of-order, replay, forgery, zero-mutation
+  test_envelope                  9       AEAD roundtrip, tamper rejection, padding randomization
+  test_path_engine               8       Ratchet chain, slot determinism, distribution uniformity
+  test_decoy                     6       Structural indistinguishability, slot placement
+  test_anti_replay               3       Duplicate rejection, capacity eviction, fresh acceptance
+  test_ffi                       3       ABI version, null pointer rejection, E2E FFI handshake
+  compile_tests                  1       Ephemeral key reuse prevention (compile-time)
+  ───────────────────────────────────────────────────────────────
+  TOTAL                          45      All passing ✅
+```
+
+Run the full suite:
+
+```bash
+cargo test
+```
+
+---
+
+## 🔧 Project Structure
+
+```
+NullPath/
+├── Cargo.toml                    # Package manifest & dependencies
+├── LICENSE                       # Dual MIT / Apache-2.0
+├── README.md                     # This document
+├── include/
+│   └── decoypath.h               # C ABI header for foreign bindings
+├── assets/                       # Documentation illustrations
+├── src/
+│   ├── lib.rs                    # Public API surface & re-exports
+│   ├── handshake.rs              # Module 1: Noise-XK mutual authentication
+│   ├── path_engine.rs            # Module 2: HMAC slot selection & ratchet chain
+│   ├── envelope.rs               # Module 3: Fixed 1024b ChaCha20-Poly1305 AEAD
+│   ├── decoy.rs                  # Module 4: CSPRNG multi-path decoy generator
+│   ├── channel.rs                # Module 5: SecureChannel state machine
+│   ├── anti_replay.rs            # Module 5b: Sliding-window anti-replay store
+│   ├── crypto.rs                 # Ephemeral X25519 keypair (move-only)
+│   ├── types.rs                  # Wire types, serialization, zeroization
+│   ├── errors.rs                 # Granular error taxonomy
+│   └── ffi.rs                    # Module 6: Hardened C ABI extern functions
+└── tests/
+    ├── test_handshake.rs         # Handshake auth & tampering tests
+    ├── test_channel.rs           # Channel state machine & attack tests
+    ├── test_envelope.rs          # AEAD seal/open & tamper tests
+    ├── test_path_engine.rs       # Ratchet & slot selection tests
+    ├── test_decoy.rs             # Decoy indistinguishability tests
+    ├── test_anti_replay.rs       # Anti-replay store tests
+    ├── test_ffi.rs               # FFI boundary tests
+    └── compile_tests/            # Compile-time safety tests
+        └── ephemeral_key_reuse.rs
+```
+
+---
+
+## 🛠️ Cryptographic Stack
+
+| Primitive | Implementation | Purpose |
+|:----------|:---------------|:--------|
+| **X25519** | `x25519-dalek` | Ephemeral Diffie-Hellman key agreement |
+| **Ed25519** | `ed25519-dalek` | Identity authentication & transcript signing |
+| **HKDF-SHA256** | `hkdf` + `sha2` | Domain-separated key derivation from DH output |
+| **HMAC-SHA256** | `hmac` + `sha2` | Ratchet chain derivation & slot index selection |
+| **ChaCha20-Poly1305** | `chacha20poly1305` | Authenticated envelope encryption (AEAD) |
+| **CSPRNG** | `rand_core::OsRng` | Nonce, padding, decoy key, and ephemeral key generation |
+| **Zeroize** | `zeroize` | Deterministic memory scrubbing of all key material |
+
+All cryptographic primitives use **audited, published Rust crates** — zero hand-rolled crypto, zero `unsafe` blocks in crypto paths.
 
 ---
 
@@ -315,3 +464,13 @@ This project is dual-licensed under:
 - **MIT License** ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT)
 
 Copyright (c) 2026 **Muhammad Abu Zar Qureshi**
+
+---
+
+<div align="center">
+
+**Built with 🔒 by [Muhammad Abu Zar Qureshi](https://github.com/aimuhammadabuzarqureshi-cloud)**
+
+*Every message you send looks identical to every message you don't.*
+
+</div>
