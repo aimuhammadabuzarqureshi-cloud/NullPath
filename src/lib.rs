@@ -4,6 +4,7 @@ pub mod crypto;
 pub mod decoy;
 pub mod envelope;
 pub mod errors;
+#[cfg(feature = "cffi")]
 pub mod ffi;
 pub mod handshake;
 pub mod path_engine;
@@ -15,6 +16,7 @@ pub use crypto::generate_identity_keypair;
 pub use decoy::{generate_decoy, generate_multi_path_slots};
 pub use envelope::{open, seal, ENVELOPE_TOTAL_LEN, MAX_PAYLOAD_SIZE};
 pub use errors::{ChannelError, DecoyError, EnvelopeError, HandshakeError, PathEngineError};
+#[cfg(feature = "cffi")]
 pub use ffi::{
     decoypath_abi_version, decoypath_channel_free, decoypath_channel_receive, decoypath_channel_send,
     decoypath_generate_identity_keypair, decoypath_initiator_finalize, decoypath_initiator_initiate,
@@ -30,3 +32,4 @@ pub use types::{
     HandshakeInitPayload, HandshakeResponsePayload, IdentityPrivateKey, RawDhSecret, RootKey,
     INIT_PAYLOAD_LEN, RESP_PAYLOAD_LEN,
 };
+

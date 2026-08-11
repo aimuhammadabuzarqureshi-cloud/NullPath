@@ -1,3 +1,4 @@
+#![cfg(feature = "cffi")]
 use decoypath::*;
 
 #[test]

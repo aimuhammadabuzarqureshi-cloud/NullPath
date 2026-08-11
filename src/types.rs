@@ -30,6 +30,15 @@ impl std::fmt::Debug for RawDhSecret {
 }
 
 /// Wrapper for long-term Ed25519 identity private signing key.
+///
+/// `ed25519-dalek`'s `SigningKey` implements `ZeroizeOnDrop` (its `Drop` calls
+/// `secret_key.zeroize()` using volatile writes), but does NOT implement the
+/// `Zeroize` trait directly — so we cannot use `#[derive(Zeroize)]` on this
+/// wrapper. Instead we implement `Zeroize` manually by extracting the raw key
+/// bytes, zeroizing them via the `zeroize` crate (which uses volatile writes to
+/// defeat dead-store elimination), and overwriting the inner `SigningKey`.
+/// The inner `SigningKey`'s own `ZeroizeOnDrop` provides an additional layer
+/// of defense on drop.
 pub struct IdentityPrivateKey(pub Ed25519PrivateKey);
 
 impl IdentityPrivateKey {
@@ -52,7 +61,11 @@ impl IdentityPrivateKey {
 
 impl Zeroize for IdentityPrivateKey {
     fn zeroize(&mut self) {
-        self.0 = Ed25519PrivateKey::from_bytes(&[0u8; 32]);
+        // Extract raw key bytes, zeroize them with volatile writes,
+        // then overwrite the inner SigningKey with the zeroed version.
+        let mut raw_bytes = self.0.to_bytes();
+        raw_bytes.zeroize(); // volatile write via zeroize crate
+        self.0 = Ed25519PrivateKey::from_bytes(&raw_bytes);
     }
 }
 
