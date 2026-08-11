@@ -69,7 +69,7 @@ Modern secure channels (TLS 1.3, Noise Protocol, Signal) protect **content confi
 | **Decoy Traffic Multiplexing** | ✅ Multi-Path CSPRNG | ❌ None | ❌ None | ❌ None | ⚠️ Cover Traffic |
 | **Traffic Metadata Obfuscation** | ✅ Application Layer | ❌ None | ❌ None | ❌ None | ✅ Routing Layer |
 | **Single-Use Key Forward Secrecy** | ✅ Hash Ratchet | ✅ Ephemeral DH | ✅ Ephemeral DH | ✅ Double Ratchet | ✅ Circuit Keys |
-| **Zero-Mutation Forgery Rejection** | ✅ 5-Step Transactional | ❌ Connection Reset | ❌ Session Fail | ❌ MAC Failure | ❌ Cell Drop |
+| **Zero-Mutation Forgery Rejection** | ✅ 5-Step Transactional | ⚠️ Reset on Forgery | ⚠️ Session Drop | ⚠️ MAC Fail Drop | ⚠️ Cell Drop |
 | **Out-of-Order Packet Processing** | ✅ Bounded Sliding | ❌ Sequential Only | ❌ Sequential Only | ✅ Out-of-Order | ❌ Sequential |
 | **C ABI Foreign Embeddability** | ✅ Hardened C ABI | ⚠️ OpenSSL / C | ⚠️ Native C | ⚠️ libsignal | ⚠️ C / Rust Lib |
 

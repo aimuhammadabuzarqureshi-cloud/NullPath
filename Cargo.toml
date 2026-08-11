@@ -6,6 +6,10 @@ authors = ["Muhammad Abu Zar Qureshi"]
 license = "MIT OR Apache-2.0"
 description = "NullPath: High-Performance Zero-Trust Multi-Path Obfuscated Secure Messaging Protocol and C ABI Library"
 
+[lib]
+name = "decoypath"
+crate-type = ["rlib", "cdylib", "staticlib"]
+
 [features]
 default = []
 cffi = []
@@ -17,6 +21,7 @@ rand_core = "0.6"
 hkdf = "0.12"
 sha2 = "0.10"
 hmac = "0.12"
+# Note: chacha20poly1305 0.10 automatically zeroizes key state on drop via zeroize dep (no manifest feature flag)
 chacha20poly1305 = "0.10"
 subtle = "2.5"
 zeroize = { version = "1.7", features = ["zeroize_derive"] }
